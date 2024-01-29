@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 async function connect () {
     try {
-        await mongoose.connect('mongodb://127.0.0.1/airbnb', {
+        await mongoose.connect('mongodb+srv://pokbe:OeIV89WmWBerbeR9@cluster0.iu6k2qw.mongodb.net/?retryWrites=true&w=majority', {
             useNewUrlParser : true,
             useUnifiedTopology : true
         })
