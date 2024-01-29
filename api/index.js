@@ -28,6 +28,7 @@ app.use(cors({
     origin: 'http://localhost:5173',
 }));
 
+console.log(process.env.MONGO_URL)
 
 async function uploadToS3(path, originalFilename, mimetype) {
     const client = new S3Client({
@@ -52,6 +53,7 @@ async function uploadToS3(path, originalFilename, mimetype) {
 }
 
 app.get('/api/test', (req, res) => {
+    db.connect(process.env.MONGO_URL)
     res.json('test ok')
 })
 
@@ -65,7 +67,7 @@ function getUserDataFromReq(req) {
 }
 
 app.post('/api/register', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { name, email, password } = req.body;
     try {
         const userDoc = await User.create({
@@ -80,7 +82,7 @@ app.post('/api/register', async (req, res) => {
 })
 
 app.post('/api/login', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { email, password } = req.body;
     const userDoc = await User.findOne({ email })
     if (userDoc) {
@@ -101,7 +103,7 @@ app.post('/api/login', async (req, res) => {
 })
 
 app.get('/api/profile', (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { token } = req.cookies;
     if (token) {
         jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -115,7 +117,7 @@ app.get('/api/profile', (req, res) => {
 })
 
 app.post('/api/logout', (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     res.cookie('token', '').json(true);
 });
 
@@ -173,7 +175,7 @@ app.post('/api/upload', photosMiddleware.array('photos', 100), async (req, res) 
 })
 
 app.post('/api/places', (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { token } = req.cookies
     const {
         title, address, addedPhotos, description,
@@ -181,7 +183,6 @@ app.post('/api/places', (req, res) => {
     } = req.body;
 
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-        db.connect()
         if (err) throw err;
         const placeDoc = await Place.create({
             owner: userData.id,
@@ -193,7 +194,7 @@ app.post('/api/places', (req, res) => {
 })
 
 app.get('/api/user-places', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { token } = req.cookies
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
         if (err) throw err;
@@ -203,18 +204,18 @@ app.get('/api/user-places', async (req, res) => {
 })
 
 app.get('/api/places', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     res.json(await Place.find())
 })
 
 app.get('/api/places/:id', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { id } = req.params
     res.json(await Place.findById(id));
 })
 
 app.put('/api/places/', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { token } = req.cookies
     const {
         id, title, address, addedPhotos, description,
@@ -238,7 +239,7 @@ app.put('/api/places/', async (req, res) => {
 
 
 app.post('/api/bookings', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const { place, checkIn, checkOut, numberOfGuests, name, phone } = req.body
     //console.log({place, checkIn, checkOut, numberOfGuests, name, phone})
     try {
@@ -255,7 +256,7 @@ app.post('/api/bookings', async (req, res) => {
 
 
 app.get('/api/bookings', async (req, res) => {
-    db.connect()
+    db.connect(process.env.MONGO_URL)
     const userData = await getUserDataFromReq(req);
     res.json(await Booking.find({ user: userData.id }).populate('place'));
 });
